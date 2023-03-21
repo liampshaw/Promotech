@@ -165,7 +165,11 @@ def getHotFeatures(sequences):
   data     = np.empty( (n_seqs, len(sample)*4) , dtype=np.ndarray)
   bar      = progressbar.ProgressBar(max_value=n_seqs)
   for i , seq in enumerate( sequences ):
-    data[i, :] = sequenceToBinary(seq)
+    # Only accept ATCG sequences i.e. no ambiguity
+    seq_clean = "".join([x for x in seq if x in ["A", "T", "C", "G"]])
+    if len(seq_clean)<40: # if ambiguous bases, set seq="A"x40 (score in RF-HOT of 0.09243)
+      seq_clean = "".join(["A" for x in range(40)])
+    data[i, :] = sequenceToBinary(seq_clean)
     bar.update(i)
   return data
 def fastaToHotEncodingSequences(seqs, nucleotide_order="AGCT"):
