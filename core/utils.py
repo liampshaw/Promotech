@@ -158,6 +158,7 @@ def sequenceToBinary( sequence ):
   return np.array([ charToBinary(nucleotide) for nucleotide in sequence ]).flatten() #map( charToBinary, sequence ) 
 
 def getHotFeatures(sequences):
+  warned_ambiguous = False
   n_seqs   = len( sequences )
   if n_seqs <= 0:
     return
@@ -169,6 +170,10 @@ def getHotFeatures(sequences):
     seq_clean = "".join([x for x in seq if x in ["A", "T", "C", "G"]])
     if len(seq_clean)<40: # if ambiguous bases, set seq="A"x40 (score in RF-HOT of 0.09243)
       seq_clean = "".join(["A" for x in range(40)])
+      if warned_ambiguous==False:
+        print("\n  WARNING: your sequence contained ambiguous bases.\n  These were set to AAA...AAA (RF-HOT score: 0.0943) for convenience.\n  For your information, here is the first sequence encountered:\n  "+seq+"\n")
+        print("  (will not warn again for future occurrences of ambiguous bases)\n")
+        warned_ambiguous = True
     data[i, :] = sequenceToBinary(seq_clean)
     bar.update(i)
   return data
